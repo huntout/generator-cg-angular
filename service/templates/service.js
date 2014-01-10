@@ -1,6 +1,8 @@
-angular.module('<%= appname %>').factory('<%= _.camelize(name) %>',function() {
+'use strict';
 
-	var <%= _.camelize(name) %> = {};
+angular.module('<%= appname %>').factory('<%= _.camelize(name) %>', function() {
 
-	return <%= _.camelize(name) %>;
+  var <%= _.camelize(name) %> = {};
+
+  return <%=_.camelize(name) %>;
 });
