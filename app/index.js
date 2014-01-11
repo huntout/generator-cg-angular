@@ -7,6 +7,13 @@ var yeoman = require('yeoman-generator');
 var CgangularGenerator = module.exports = function CgangularGenerator(args, options /*, config*/ ) {
   yeoman.generators.Base.apply(this, arguments);
 
+  this.argument('appname', {
+    type: String,
+    required: false
+  });
+  this.appname = this.appname || path.basename(process.cwd());
+  this.appname = this._.camelize(this._.slugify(this._.humanize(this.appname)));
+
   this.on('end', function() {
     this.installDependencies({
       skipInstall: options['skip-install']
@@ -24,7 +31,7 @@ CgangularGenerator.prototype.askFor = function askFor() {
   var prompts = [{
     name: 'appname',
     message: 'What would you like the angular app/module name to be?',
-    default: path.basename(process.cwd())
+    default: this.appname
   }];
 
   this.prompt(prompts, function(props) {
