@@ -7,6 +7,7 @@
     "type": "git"
   },
   "devDependencies": {
+    "jpegtran-bin": "0.2.0",
     "grunt": "~0.4",
     "grunt-dom-munger": "~3.1",
     "grunt-angular-templates": "~0.5",
