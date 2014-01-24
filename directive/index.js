@@ -45,7 +45,7 @@ DirectiveGenerator.prototype.files = function files() {
     this.template('directive.less', 'directive/' + this.name + '/' + this.name + '.less');
     this.template('spec.js', 'directive/' + this.name + '/' + this.name + '-spec.js');
 
-    cgUtils.addToFile('index.html', '<script src="directive/' + this.name + '/' + this.name + '.js"></script>', cgUtils.DIRECTIVE_JS_MARKER, '  ');
+    cgUtils.addToFile('index.html', '<script class="app" src="directive/' + this.name + '/' + this.name + '.js"></script>', cgUtils.DIRECTIVE_JS_MARKER, '  ');
     this.log.writeln(chalk.green(' updating') + ' %s', 'index.html');
 
     cgUtils.addToFile('css/app.less', '@import "../directive/' + this.name + '/' + this.name + '.less";', cgUtils.DIRECTIVE_LESS_MARKER, '');
@@ -54,7 +54,7 @@ DirectiveGenerator.prototype.files = function files() {
     this.template('directive_simple.js', 'directive/' + this.name + '.js');
     this.template('spec.js', 'directive/' + this.name + '-spec.js');
 
-    cgUtils.addToFile('index.html', '<script src="directive/' + this.name + '.js"></script>', cgUtils.DIRECTIVE_JS_MARKER, '  ');
+    cgUtils.addToFile('index.html', '<script class="app" src="directive/' + this.name + '.js"></script>', cgUtils.DIRECTIVE_JS_MARKER, '  ');
     this.log.writeln(chalk.green(' updating') + ' %s', 'index.html');
   }
 

@@ -48,7 +48,7 @@ PartialGenerator.prototype.files = function files() {
   this.template('partial.less', 'partial/' + this.name + '/' + this.name + '.less');
   this.template('spec.js', 'partial/' + this.name + '/' + this.name + '-spec.js');
 
-  cgUtils.addToFile('index.html', '<script src="partial/' + this.name + '/' + this.name + '.js"></script>', cgUtils.PARTIAL_JS_MARKER, '  ');
+  cgUtils.addToFile('index.html', '<script class="app" src="partial/' + this.name + '/' + this.name + '.js"></script>', cgUtils.PARTIAL_JS_MARKER, '  ');
   this.log.writeln(chalk.green(' updating') + ' %s', 'index.html');
 
   cgUtils.addToFile('css/app.less', '@import "../partial/' + this.name + '/' + this.name + '.less";', cgUtils.PARTIAL_LESS_MARKER, '');

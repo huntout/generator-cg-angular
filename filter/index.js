@@ -24,6 +24,6 @@ FilterGenerator.prototype.files = function files() {
   this.template('filter.js', 'filter/' + this.name + '.js');
   this.template('spec.js', 'filter/' + this.name + '-spec.js');
 
-  cgUtils.addToFile('index.html', '<script src="filter/' + this.name + '.js"></script>', cgUtils.FILTER_JS_MARKER, '  ');
+  cgUtils.addToFile('index.html', '<script class="app" src="filter/' + this.name + '.js"></script>', cgUtils.FILTER_JS_MARKER, '  ');
   this.log.writeln(chalk.green(' updating') + ' %s', 'index.html');
 };
