@@ -14,24 +14,28 @@
 <body>
 
   <!-- Livereload script for development only (stripped during dist build) -->
-  <script src="http://localhost:35729/livereload.js" data-build="exclude"></script>
+  <script class="dev" src="http://localhost:35729/livereload.js"></script>
+  <script class="dev" src="bower_components/less.js/dist/less-1.5.0.js"></script>
+
+  <div app-view-segment="0">
+  </div>
 
   <!-- JS from Bower components -->
-  <script src="bower_components/less.js/dist/less-1.5.0.js" data-build="exclude"></script>
-  <script src="bower_components/jquery/jquery.js"></script>
-  <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-  <script src="bower_components/underscore/underscore.js"></script>
-  <script src="bower_components/moment/moment.js"></script>
-  <script src="bower_components/angular/angular.js"></script>
-  <script src="bower_components/angular-route/angular-route.js"></script>
-  <script src="bower_components/angular-animate/angular-animate.js"></script>
-  <script src="bower_components/angular-resource/angular-resource.js"></script>
-  <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-  <script src="bower_components/angular-ui-utils/ui-utils.js"></script>
-
+  <script class="lib" src="bower_components/jquery/jquery.js"></script>
+  <script class="lib" src="bower_components/underscore/underscore.js"></script>
+  <script class="lib" src="bower_components/moment/moment.js"></script>
+  <script class="lib" src="bower_components/angular/angular.js"></script>
+  <script class="lib" src="bower_components/angular-route/angular-route.js"></script>
+  <script class="lib" src="bower_components/angular-animate/angular-animate.js"></script>
+  <script class="lib" src="bower_components/angular-resource/angular-resource.js"></script>
+  <script class="lib" src="bower_components/angular-strap/dist/angular-strap.js"></script>
+  <script class="lib" src="bower_components/angular-strap/dist/angular-strap.tpl.js"></script>
+  <script class="lib" src="bower_components/angular-route-segment/build/angular-route-segment.js"></script>
+  <script class="lib" src="bower_components/angular-ui-utils/ui-utils.js"></script>
+  <script class="lib" src="bower_components/angular-http-auth/src/http-auth-interceptor.js"></script>
 
   <!-- Main App JS -->
-  <script src="js/setup.js"></script>
+  <script class="app" src="js/setup.js"></script>
 
   <!-- Service JS -->
   <!-- Add New Service JS Above -->
@@ -44,15 +48,6 @@
 
   <!-- Partial JS -->
   <!-- Add New Partial JS Above -->
-
-  <div>
-    <div id="content" class="container">
-      <div class="row">
-        <div ng-view>
-        </div>
-      </div>
-    </div>
-  </div>
 
 </body>
 

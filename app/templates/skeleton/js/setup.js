@@ -1,13 +1,23 @@
 'use strict';
 
-angular.module('<%= _.slugify(appname) %>', ['ui.bootstrap', 'ui.utils', 'ngRoute', 'ngAnimate']);
+angular.module('<%= _.slugify(appname) %>', [
+  'mgcrea.ngStrap',
+  'ui.utils',
+  'ngRoute',
+  'ngAnimate',
+  'route-segment',
+  'view-segment',
+  'http-auth-interceptor'
+]);
 
-angular.module('<%= _.slugify(appname) %>').config(function($routeProvider) {
+angular.module('<%= _.slugify(appname) %>').config(function($routeSegmentProvider, $routeProvider) {
 
-  $routeProvider.
-  /* Add New Routes Above */
-  otherwise({
-    redirectTo: '/home'
+  $routeSegmentProvider.options.autoLoadTemplates = true;
+
+  /* Add New Route Segments Above */
+
+  $routeProvider.otherwise({
+    redirectTo: '/'
   });
 
 });

@@ -1,11 +1,13 @@
-/* global require */
 'use strict';
+/* global require */
 
 var path = require('path');
 
 var folderMount = function folderMount(connect, point) {
   return connect.static(path.resolve(point));
 };
+
+var proxySnippet = require('grunt-connect-proxy/lib/utils').proxyRequest;
 
 module.exports = function(grunt) {
 
@@ -15,12 +17,32 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     connect: {
-      main: {
+      proxies: [{
+        context: ['/api', '/userfiles'],
+        host: 'localhost',
+        port: 8080,
+        rewrite: {
+          '^/api': '/service'
+        }
+      }],
+      options: {
+        middleware: function(connect, options) {
+          return [
+            proxySnippet,
+            folderMount(connect, options.base)
+          ];
+        }
+      },
+      livereload: {
+        options: {
+          port: 9000,
+          open: true
+        }
+      },
+      dist: {
         options: {
           port: 9001,
-          middleware: function(connect, options) {
-            return [folderMount(connect, options.base)];
-          }
+          base: 'dist'
         }
       }
     },
@@ -64,7 +86,7 @@ module.exports = function(grunt) {
           module: '<%= _.slugify(appname) %>',
           htmlmin: {
             collapseBooleanAttributes: true,
-            collapseWhitespace: true,
+            collapseWhitespace: false,
             removeAttributeQuotes: true,
             removeComments: true,
             removeEmptyAttributes: true,
@@ -80,30 +102,44 @@ module.exports = function(grunt) {
     copy: {
       main: {
         files: [{
-            src: ['index.html'],
-            dest: 'dist/'
-          }, {
-            src: ['img/**'],
-            dest: 'dist/'
-          }, {
-            src: ['bower_components/angular-ui-utils/ui-utils-ieshiv.min.js'],
-            dest: 'dist/'
-          }, {
-            src: ['bower_components/font-awesome/fonts/**'],
-            dest: 'dist/',
-            filter: 'isFile',
-            expand: true
-          }
-          // {src: ['bower_components/select2/*.png','bower_components/select2/*.gif'], dest:'dist/css/',flatten:true,expand:true},
-          // {src: ['bower_components/angular-mocks/angular-mocks.js'], dest: 'dist/'}
-        ]
+          src: [
+            'index.html',
+            'img/**',
+            'bower_components/angular-ui-utils/ui-utils-ieshiv.*',
+            'bower_components/bootstrap/dist/fonts/**',
+            'bower_components/font-awesome/fonts/**'
+          ],
+          dest: 'dist/',
+          filter: 'isFile',
+          expand: true
+        }]
       }
     },
     dom_munger: {
+      readlibs: {
+        options: {
+          read: {
+            selector: 'script.lib',
+            attribute: 'src',
+            writeto: 'libjs'
+          }
+        },
+        src: 'index.html'
+      },
+      readcats: {
+        options: {
+          read: {
+            selector: 'script.cat',
+            attribute: 'src',
+            writeto: 'catjs'
+          }
+        },
+        src: 'index.html'
+      },
       readscripts: {
         options: {
           read: {
-            selector: 'script[data-build!="exclude"]',
+            selector: 'script.app',
             attribute: 'src',
             writeto: 'appjs'
           }
@@ -122,11 +158,7 @@ module.exports = function(grunt) {
       },
       removescripts: {
         options: {
-          remove: 'script[data-remove!="exclude"]',
-          append: {
-            selector: 'head',
-            html: '<script src="app.full.min.js"></script>'
-          }
+          remove: 'script'
         },
         src: 'dist/index.html'
       },
@@ -134,18 +166,18 @@ module.exports = function(grunt) {
         options: {
           append: {
             selector: 'body',
-            html: '<script src="app.full.min.js"></script>'
+            html: [
+              '<script src="js/lib.min.js"></script>',
+              '<script src="js/cat.js"></script>',
+              '<script src="js/app.min.js"></script>'
+            ].join('')
           }
         },
         src: 'dist/index.html'
       },
       removecss: {
         options: {
-          remove: 'link',
-          append: {
-            selector: 'head',
-            html: '<link rel="stylesheet" href="css/app.full.min.css">'
-          }
+          remove: 'link'
         },
         src: 'dist/index.html'
       },
@@ -153,7 +185,7 @@ module.exports = function(grunt) {
         options: {
           append: {
             selector: 'head',
-            html: '<link rel="stylesheet" href="css/app.full.min.css">'
+            html: '<link rel="stylesheet" href="css/app.min.css">'
           }
         },
         src: 'dist/index.html'
@@ -162,25 +194,54 @@ module.exports = function(grunt) {
     cssmin: {
       main: {
         src: ['temp/app.css', '<%%= dom_munger.data.appcss %>'],
-        dest: 'dist/css/app.full.min.css'
+        dest: 'dist/css/app.min.css'
       }
     },
     concat: {
+      lib: {
+        src: ['<%%= dom_munger.data.libjs %>'],
+        dest: 'dist/js/lib.js'
+      },
+      cat: {
+        src: ['<%%= dom_munger.data.catjs %>'],
+        dest: 'dist/js/cat.js'
+      },
       main: {
         src: ['<%%= dom_munger.data.appjs %>', '<%%= ngtemplates.main.dest %>'],
-        dest: 'temp/app.full.js'
+        dest: 'dist/js/app.js'
       }
     },
     ngmin: {
+      lib: {
+        src: 'dist/js/lib.js',
+        dest: 'dist/js/lib.js'
+      },
       main: {
-        src: 'temp/app.full.js',
-        dest: 'temp/app.full.js'
+        src: 'dist/js/app.js',
+        dest: 'dist/js/app.js'
       }
     },
     uglify: {
+      options: {
+        report: 'min',
+        sourceMapRoot: '/',
+        sourceMapPrefix: 1
+      },
+      lib: {
+        options: {
+          sourceMap: 'dist/js/lib.min.js.map',
+          sourceMappingURL: 'lib.min.js.map'
+        },
+        src: 'dist/js/lib.js',
+        dest: 'dist/js/lib.min.js'
+      },
       main: {
-        src: 'temp/app.full.js',
-        dest: 'dist/app.full.min.js'
+        options: {
+          sourceMap: 'dist/js/app.min.js.map',
+          sourceMappingURL: 'app.min.js.map'
+        },
+        src: 'dist/js/app.js',
+        dest: 'dist/js/app.min.js'
       }
     },
     htmlmin: {
@@ -212,7 +273,11 @@ module.exports = function(grunt) {
     },
     jasmine: {
       unit: {
-        src: ['<%%= dom_munger.data.appjs %>', 'bower_components/angular-mocks/angular-mocks.js'],
+        src: [
+          '<%%= dom_munger.data.libjs %>',
+          '<%%= dom_munger.data.catjs %>',
+          '<%%= dom_munger.data.appjs %>'
+        ],
         options: {
           keepRunner: true,
           specs: ['js/**/*-spec.js', 'partial/**/*-spec.js', 'service/**/*-spec.js', 'filter/**/*-spec.js', 'directive/**/*-spec.js']
@@ -221,10 +286,59 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('build', ['jshint', 'clean:before', 'less', 'dom_munger:readcss', 'dom_munger:readscripts', 'ngtemplates', 'cssmin', 'concat', 'ngmin', 'uglify', 'copy', 'dom_munger:removecss', 'dom_munger:addcss', 'dom_munger:removescripts', 'dom_munger:addscript', 'htmlmin', 'imagemin', 'clean:after']);
-  grunt.registerTask('server', ['dom_munger:readscripts', 'jshint', 'connect', 'watch']);
-  grunt.registerTask('test', ['dom_munger:readscripts', 'jasmine']);
+  grunt.registerTask('serve', function(target) {
+    if (target === 'dist') {
+      return grunt.task.run([
+        'build',
+        'configureProxies',
+        'connect:dist:keepalive'
+      ]);
+    }
 
+    grunt.task.run([
+      'jshint',
+      'readdom',
+      'configureProxies',
+      'connect:livereload',
+      'watch'
+    ]);
+  });
+
+  grunt.registerTask('readdom', [
+    'dom_munger:readlibs',
+    'dom_munger:readcats',
+    'dom_munger:readscripts',
+    'dom_munger:readcss'
+  ]);
+
+  grunt.registerTask('build', [
+    'jshint',
+    'clean:before',
+    'less',
+    'readdom',
+    'ngtemplates',
+    'cssmin',
+    'concat',
+    'ngmin',
+    'uglify',
+    'copy',
+    'dom_munger:removecss',
+    'dom_munger:addcss',
+    'dom_munger:removescripts',
+    'dom_munger:addscript',
+    'htmlmin',
+    'imagemin',
+    'clean:after'
+  ]);
+
+  grunt.registerTask('test', function(target) {
+    if (target === 'watch') {
+      return grunt.task.run(['test', 'watch']);
+    }
+    grunt.task.run(['jshint', 'readdom', 'jasmine']);
+  });
+
+  grunt.registerTask('default', ['build']);
 
   grunt.event.on('watch', function(action, filepath) {
     //https://github.com/gruntjs/grunt-contrib-watch/issues/156
@@ -251,7 +365,7 @@ module.exports = function(grunt) {
     //if index.html changed, we need to reread the <script> tags so our next run of jasmine
     //will have the correct environment
     if (filepath === 'index.html') {
-      grunt.task.run('dom_munger:readscripts');
+      grunt.task.run('readdom');
     }
 
   });

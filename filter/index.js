@@ -4,7 +4,6 @@ var util = require('util');
 var yeoman = require('yeoman-generator');
 var path = require('path');
 var cgUtils = require('../utils.js');
-var chalk = require('chalk');
 
 var FilterGenerator = module.exports = function FilterGenerator( /*args, options, config*/ ) {
 
@@ -24,6 +23,5 @@ FilterGenerator.prototype.files = function files() {
   this.template('filter.js', 'filter/' + this.name + '.js');
   this.template('spec.js', 'filter/' + this.name + '-spec.js');
 
-  cgUtils.addToFile('index.html', '<script class="app" src="filter/' + this.name + '.js"></script>', cgUtils.FILTER_JS_MARKER, '  ');
-  this.log.writeln(chalk.green(' updating') + ' %s', 'index.html');
+  cgUtils.addToFile('index.html', '<script class="app" src="filter/' + this.name + '.js"></script>', cgUtils.FILTER_JS_MARKER, '  ', this);
 };
