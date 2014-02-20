@@ -1,6 +1,6 @@
 temp/
 dist/
 node_modules/
-bower_components/
+<%= assets %>/bower_components/
 .grunt/
 _SpecRunner.html
