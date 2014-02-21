@@ -1,23 +1,15 @@
 'use strict';
 
 var util = require('util');
-var yeoman = require('yeoman-generator');
-var path = require('path');
+var SubGenerator = require('../sub-generator.js');
 var cgUtils = require('../utils.js');
 
 var DirectiveGenerator = module.exports = function DirectiveGenerator( /*args, options, config*/ ) {
 
-  yeoman.generators.NamedBase.apply(this, arguments);
-
-  try {
-    this.appname = require(path.join(process.cwd(), 'package.json')).name;
-  } catch (e) {
-    this.appname = 'Cant find name from package.json';
-  }
-
+  SubGenerator.apply(this, arguments);
 };
 
-util.inherits(DirectiveGenerator, yeoman.generators.NamedBase);
+util.inherits(DirectiveGenerator, SubGenerator);
 
 DirectiveGenerator.prototype.askFor = function askFor() {
   var cb = this.async();
@@ -55,5 +47,4 @@ DirectiveGenerator.prototype.files = function files() {
 
     cgUtils.addToFile('index.html', '<script class="app" src="directive/' + this.name + '.js"></script>', cgUtils.DIRECTIVE_JS_MARKER, '  ', this);
   }
-
 };

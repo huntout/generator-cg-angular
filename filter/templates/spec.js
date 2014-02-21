@@ -9,7 +9,5 @@ describe('<%= _.camelize(name) %>', function() {
     var filter = $filter('<%= _.camelize(name) %>');
 
     expect(filter('input')).toEqual('output');
-
   }));
-
 });

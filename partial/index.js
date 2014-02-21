@@ -1,8 +1,7 @@
 'use strict';
 
 var util = require('util');
-var yeoman = require('yeoman-generator');
-var path = require('path');
+var SubGenerator = require('../sub-generator.js');
 var cgUtils = require('../utils.js');
 var _ = require('underscore');
 
@@ -11,30 +10,24 @@ _.mixin(_.str.exports());
 
 var PartialGenerator = module.exports = function PartialGenerator( /*args, options, config*/ ) {
 
-  yeoman.generators.NamedBase.apply(this, arguments);
-
-  try {
-    this.appname = require(path.join(process.cwd(), 'package.json')).name;
-  } catch (e) {
-    this.appname = 'Cant find name from package.json';
-  }
-
+  SubGenerator.apply(this, arguments);
 };
 
-util.inherits(PartialGenerator, yeoman.generators.NamedBase);
+util.inherits(PartialGenerator, SubGenerator);
 
 PartialGenerator.prototype.askForRoute = function askForRoute() {
   var cb = this.async();
 
   var paramsFromRoute = function paramsFromRoute(route) {
-    var a = _.words(route, '/');
-    a = _.filter(a, function(n) {
-      return _.startsWith(n, ':');
-    });
-    a = _.map(a, function(n) {
-      return _.strRight(n, ':');
-    });
-    return a;
+    return _(route).chain()
+      .words('/')
+      .filter(function(n) {
+        return _.startsWith(n, ':');
+      })
+      .map(function(n) {
+        return _.strRight(n, ':');
+      })
+      .value();
   };
 
   var prompts = [{
@@ -141,7 +134,6 @@ PartialGenerator.prototype.files = function files() {
       src = cgUtils.addToString(src, routeSegment(), cgUtils.ROUTE_SEGMENT_MARKER, '  ');
 
       return src;
-
     }, this);
   }
 };

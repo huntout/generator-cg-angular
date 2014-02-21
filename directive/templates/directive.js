@@ -8,7 +8,7 @@ angular.module('<%= appname %>').directive('<%= _.camelize(name) %>', function()
 
     },
     templateUrl: 'directive/<%= name %>/<%= name %>.html',
-    link: function(scope, element, attrs, fn) {
+    link: function( /*scope, element, attrs, fn*/ ) {
 
     }
   };

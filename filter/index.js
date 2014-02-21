@@ -1,23 +1,15 @@
 'use strict';
 
 var util = require('util');
-var yeoman = require('yeoman-generator');
-var path = require('path');
+var SubGenerator = require('../sub-generator.js');
 var cgUtils = require('../utils.js');
 
 var FilterGenerator = module.exports = function FilterGenerator( /*args, options, config*/ ) {
 
-  yeoman.generators.NamedBase.apply(this, arguments);
-
-  try {
-    this.appname = require(path.join(process.cwd(), 'package.json')).name;
-  } catch (e) {
-    this.appname = 'Cant find name from package.json';
-  }
-
+  SubGenerator.apply(this, arguments);
 };
 
-util.inherits(FilterGenerator, yeoman.generators.NamedBase);
+util.inherits(FilterGenerator, SubGenerator);
 
 FilterGenerator.prototype.files = function files() {
   this.template('filter.js', 'filter/' + this.name + '.js');
