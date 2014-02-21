@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('<%= _.slugify(appname) %>', [
+angular.module('<%= appname %>', [
   'mgcrea.ngStrap',
   'ui.utils',
   'ngRoute',
@@ -10,7 +10,7 @@ angular.module('<%= _.slugify(appname) %>', [
   'http-auth-interceptor'
 ]);
 
-angular.module('<%= _.slugify(appname) %>').config(function($routeSegmentProvider, $routeProvider) {
+angular.module('<%= appname %>').config(function($routeSegmentProvider, $routeProvider) {
 
   $routeSegmentProvider.options.autoLoadTemplates = true;
 
@@ -19,10 +19,9 @@ angular.module('<%= _.slugify(appname) %>').config(function($routeSegmentProvide
   $routeProvider.otherwise({
     redirectTo: '/'
   });
-
 });
 
-angular.module('<%= _.slugify(appname) %>').run(function($rootScope) {
+angular.module('<%= appname %>').run(function($rootScope) {
 
   $rootScope.safeApply = function(fn) {
     var phase = $rootScope.$$phase;
@@ -34,5 +33,4 @@ angular.module('<%= _.slugify(appname) %>').run(function($rootScope) {
       this.$apply(fn);
     }
   };
-
 });

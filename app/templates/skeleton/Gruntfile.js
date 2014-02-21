@@ -1,21 +1,33 @@
 'use strict';
 /* global require */
 
-var path = require('path');
-
-var folderMount = function folderMount(connect, point) {
-  return connect.static(path.resolve(point));
-};
-
 var proxySnippet = require('grunt-connect-proxy/lib/utils').proxyRequest;
+var _ = require('underscore');
+var path = require('path');
 
 module.exports = function(grunt) {
 
-  // load all grunt tasks
-  require('load-grunt-tasks')(grunt);
+  // Load all grunt tasks
+  require('load-grunt-tasks')(grunt, {
+    pattern: ['grunt-*', '!grunt-template-*']
+  });
 
-  // Project configuration.
+  // Project configuration
   grunt.initConfig({
+    // configurable paths
+    yo: (function() {
+      var main = grunt.file.readJSON('bower.json').main || 'index.html';
+      var assets = path.dirname(main);
+      return {
+        main: main,
+        assets: assets,
+        folders: {
+          js: 'js,service,filter,directive,partial',
+          html: 'directive,partial'
+        }
+      };
+    })(),
+
     connect: {
       proxies: [{
         context: ['/api', '/userfiles'],
@@ -27,15 +39,20 @@ module.exports = function(grunt) {
       }],
       options: {
         middleware: function(connect, options) {
-          return [
-            proxySnippet,
-            folderMount(connect, options.base)
-          ];
+          var middlewares = [proxySnippet];
+          if (!Array.isArray(options.base)) {
+            options.base = [options.base];
+          }
+          options.base.forEach(function(base) {
+            middlewares.push(connect.static(base));
+          });
+          return middlewares;
         }
       },
       livereload: {
         options: {
           port: 9000,
+          base: ['.', 'temp'],
           open: true
         }
       },
@@ -46,47 +63,65 @@ module.exports = function(grunt) {
         }
       }
     },
+
     watch: {
+      options: {
+        livereload: true,
+        spawn: false
+      },
       main: {
-        options: {
-          livereload: true,
-          spawn: false
-        },
-        files: ['js/**/*', 'css/**/*', 'img/**/*', 'partial/**/*', 'service/**/*', 'filter/**/*', 'directive/**/*', 'index.html'],
+        files: ['<%%= yo.main %>', '<%%= yo.assets %>/{css,img,mock,<%%= yo.folders.js %>}/**/*'],
         tasks: [] //all the tasks are run dynamically during the watch event handler
       }
     },
+
     jshint: {
       main: {
         options: {
           jshintrc: '.jshintrc'
         },
-        src: ['js/**/*.js', 'partial/**/*.js', 'service/**/*.js', 'filter/**/*.js', 'directive/**/*.js']
+        src: '<%%= yo.assets %>/{mock,<%%= yo.folders.js %>}/**/*.js'
       }
     },
+
     clean: {
-      before: {
-        src: ['dist', 'temp']
-      },
-      after: {
-        src: ['temp']
+      all: {
+        src: ['.grunt', 'dist', 'temp']
       }
     },
+
     less: {
-      production: {
-        options: {},
+      options: {
+        report: 'min'
+      },
+      dev: {
+        options: {
+          sourceMap: true,
+          sourceMapFilename: 'temp/<%%= yo.assets %>/css/app.less.css.map',
+          sourceMapURL: 'app.less.css.map',
+          sourceMapRootpath: '/'
+        },
         files: {
-          'temp/app.css': 'css/app.less'
+          'temp/<%%= yo.assets %>/css/app.less.css': '<%%= yo.assets %>/css/app.less'
+        }
+      },
+      dist: {
+        options: {
+          cleancss: true
+        },
+        files: {
+          'temp/app.less.css': '<%%= yo.assets %>/css/app.less'
         }
       }
     },
+
     ngtemplates: {
       main: {
         options: {
-          module: '<%= _.slugify(appname) %>',
+          module: '<%= appname %>',
           htmlmin: {
             collapseBooleanAttributes: true,
-            collapseWhitespace: false,
+            collapseWhitespace: true,
             removeAttributeQuotes: true,
             removeComments: true,
             removeEmptyAttributes: true,
@@ -95,132 +130,133 @@ module.exports = function(grunt) {
             removeStyleLinkTypeAttributes: true
           }
         },
-        src: ['partial/**/*.html', 'directive/**/*.html'],
+        cwd: '<%%= yo.assets %>',
+        src: '{<%%= yo.folders.html %>}/**/*.html',
         dest: 'temp/templates.js'
       }
     },
+
     copy: {
       main: {
-        files: [{
-          src: [
-            'index.html',
-            'img/**',
-            'bower_components/angular-ui-utils/ui-utils-ieshiv.*',
-            'bower_components/bootstrap/dist/fonts/**',
-            'bower_components/font-awesome/fonts/**'
-          ],
-          dest: 'dist/',
-          filter: 'isFile',
-          expand: true
-        }]
+        expand: true,
+        cwd: '<%%= yo.assets %>',
+        filter: 'isFile',
+        src: [
+          'img/**',
+          'bower_components/angular-ui-utils/ui-utils-ieshiv.*',
+          'bower_components/bootstrap/dist/fonts/**',
+          'bower_components/font-awesome/fonts/**'
+        ],
+        dest: 'dist/<%%= yo.assets %>'
       }
     },
+
     dom_munger: {
-      readlibs: {
+      read: {
         options: {
-          read: {
+          read: [{
             selector: 'script.lib',
             attribute: 'src',
             writeto: 'libjs'
-          }
-        },
-        src: 'index.html'
-      },
-      readcats: {
-        options: {
-          read: {
+          }, {
             selector: 'script.cat',
             attribute: 'src',
             writeto: 'catjs'
-          }
-        },
-        src: 'index.html'
-      },
-      readscripts: {
-        options: {
-          read: {
+          }, {
             selector: 'script.app',
             attribute: 'src',
             writeto: 'appjs'
-          }
-        },
-        src: 'index.html'
-      },
-      readcss: {
-        options: {
-          read: {
-            selector: 'link[rel="stylesheet"]',
+          }, {
+            selector: 'link[type="text/css"]',
             attribute: 'href',
-            writeto: 'appcss'
-          }
+            writeto: 'purecss'
+          }]
         },
-        src: 'index.html'
+        src: '<%%= yo.main %>'
       },
-      removescripts: {
+      update: {
         options: {
-          remove: 'script'
-        },
-        src: 'dist/index.html'
-      },
-      addscript: {
-        options: {
-          append: {
+          remove: ['link', 'script'],
+          append: [{
+            selector: 'head',
+            html: '<link rel="stylesheet" href="css/app.min.css">'
+          }, {
             selector: 'body',
             html: [
               '<script src="js/lib.min.js"></script>',
               '<script src="js/cat.js"></script>',
               '<script src="js/app.min.js"></script>'
             ].join('')
-          }
+          }]
         },
-        src: 'dist/index.html'
-      },
-      removecss: {
-        options: {
-          remove: 'link'
-        },
-        src: 'dist/index.html'
-      },
-      addcss: {
-        options: {
-          append: {
-            selector: 'head',
-            html: '<link rel="stylesheet" href="css/app.min.css">'
-          }
-        },
-        src: 'dist/index.html'
+        src: '<%%= yo.main %>',
+        dest: 'dist/<%%= yo.main %>'
       }
     },
+
+    concat: {
+      build: {
+        files: [{
+          src: '<%%= dom_munger.data.purecss %>',
+          dest: 'temp/pure.css'
+        }, {
+          src: '<%%= dom_munger.data.libjs %>',
+          dest: 'dist/<%%= yo.assets %>/js/lib.js'
+        }, {
+          src: '<%%= dom_munger.data.catjs %>',
+          dest: 'dist/<%%= yo.assets %>/js/cat.js'
+        }, {
+          src: '<%%= dom_munger.data.appjs %>',
+          dest: 'temp/app.js'
+        }, {
+          src: ['temp/app.js', '<%%= ngtemplates.main.dest %>'],
+          dest: 'dist/<%%= yo.assets %>/js/app.js',
+          expand: false
+        }].map(function(n) {
+          if (n.expand === false) {
+            return n;
+          }
+          return _.extend(n, {
+            expand: true,
+            cwd: '<%%= yo.assets %>',
+            rename: function(destBase /*, destPath*/ ) {
+              return destBase;
+            }
+          });
+        })
+      },
+      jasmine: {
+        expand: true,
+        cwd: '<%%= yo.assets %>',
+        src: [
+          '<%%= dom_munger.data.libjs %>',
+          '<%%= dom_munger.data.catjs %>'
+        ],
+        rename: function(destBase /*, destPath*/ ) {
+          return destBase;
+        },
+        dest: 'temp/vendor.js'
+      }
+    },
+
     cssmin: {
       main: {
-        src: ['temp/app.css', '<%%= dom_munger.data.appcss %>'],
-        dest: 'dist/css/app.min.css'
+        src: ['temp/app.less.css', 'temp/pure.css'],
+        dest: 'dist/<%%= yo.assets %>/css/app.min.css'
       }
     },
-    concat: {
-      lib: {
-        src: ['<%%= dom_munger.data.libjs %>'],
-        dest: 'dist/js/lib.js'
-      },
-      cat: {
-        src: ['<%%= dom_munger.data.catjs %>'],
-        dest: 'dist/js/cat.js'
-      },
-      main: {
-        src: ['<%%= dom_munger.data.appjs %>', '<%%= ngtemplates.main.dest %>'],
-        dest: 'dist/js/app.js'
-      }
-    },
+
     ngmin: {
       lib: {
-        src: 'dist/js/lib.js',
-        dest: 'dist/js/lib.js'
+        src: 'dist/<%%= yo.assets %>/js/lib.js',
+        dest: 'dist/<%%= yo.assets %>/js/lib.js'
       },
       main: {
-        src: 'dist/js/app.js',
-        dest: 'dist/js/app.js'
+        src: 'dist/<%%= yo.assets %>/js/app.js',
+        dest: 'dist/<%%= yo.assets %>/js/app.js'
       }
     },
+
     uglify: {
       options: {
         report: 'min',
@@ -229,21 +265,22 @@ module.exports = function(grunt) {
       },
       lib: {
         options: {
-          sourceMap: 'dist/js/lib.min.js.map',
+          sourceMap: 'dist/<%%= yo.assets %>/js/lib.min.js.map',
           sourceMappingURL: 'lib.min.js.map'
         },
-        src: 'dist/js/lib.js',
-        dest: 'dist/js/lib.min.js'
+        src: 'dist/<%%= yo.assets %>/js/lib.js',
+        dest: 'dist/<%%= yo.assets %>/js/lib.min.js'
       },
       main: {
         options: {
-          sourceMap: 'dist/js/app.min.js.map',
+          sourceMap: 'dist/<%%= yo.assets %>/js/app.min.js.map',
           sourceMappingURL: 'app.min.js.map'
         },
-        src: 'dist/js/app.js',
-        dest: 'dist/js/app.min.js'
+        src: 'dist/<%%= yo.assets %>/js/app.js',
+        dest: 'dist/<%%= yo.assets %>/js/app.min.js'
       }
     },
+
     htmlmin: {
       main: {
         options: {
@@ -257,10 +294,11 @@ module.exports = function(grunt) {
           removeStyleLinkTypeAttributes: true
         },
         files: {
-          'dist/index.html': 'dist/index.html'
+          'dist/<%%= yo.main %>': 'dist/<%%= yo.main %>'
         }
       }
     },
+
     imagemin: {
       main: {
         files: [{
@@ -271,21 +309,49 @@ module.exports = function(grunt) {
         }]
       }
     },
+
     jasmine: {
+      options: {
+        keepRunner: true,
+        vendor: 'temp/vendor.js'
+      },
       unit: {
-        src: [
-          '<%%= dom_munger.data.libjs %>',
-          '<%%= dom_munger.data.catjs %>',
-          '<%%= dom_munger.data.appjs %>'
-        ],
+        expand: true,
+        cwd: '<%%= yo.assets %>',
+        src: '<%%= dom_munger.data.appjs %>',
         options: {
-          keepRunner: true,
-          specs: ['js/**/*-spec.js', 'partial/**/*-spec.js', 'service/**/*-spec.js', 'filter/**/*-spec.js', 'directive/**/*-spec.js']
+          specs: ''
+        }
+      },
+      coverage: {
+        expand: true,
+        cwd: '<%%= yo.assets %>',
+        src: '<%%= dom_munger.data.appjs %>',
+        options: {
+          specs: '<%%= yo.assets %>/{<%%= yo.folders.js %>}/**/*-spec.js',
+          template: require('grunt-template-jasmine-istanbul'),
+          templateOptions: {
+            coverage: 'temp/coverage/coverage.json',
+            report: [{
+              type: 'html',
+              options: {
+                dir: 'temp/coverage/html'
+              }
+            }, {
+              type: 'cobertura',
+              options: {
+                dir: 'temp/coverage/cobertura'
+              }
+            }, {
+              type: 'text-summary'
+            }]
+          }
         }
       }
     }
   });
 
+  // Register task
   grunt.registerTask('serve', function(target) {
     if (target === 'dist') {
       return grunt.task.run([
@@ -297,45 +363,52 @@ module.exports = function(grunt) {
 
     grunt.task.run([
       'jshint',
-      'readdom',
+      'less:dev',
+      'dom_munger:read',
       'configureProxies',
       'connect:livereload',
       'watch'
     ]);
   });
 
-  grunt.registerTask('readdom', [
-    'dom_munger:readlibs',
-    'dom_munger:readcats',
-    'dom_munger:readscripts',
-    'dom_munger:readcss'
-  ]);
-
   grunt.registerTask('build', [
     'jshint',
-    'clean:before',
-    'less',
-    'readdom',
+    'clean',
+    'less:dist',
+    'dom_munger:read',
     'ngtemplates',
+    'concat:build',
     'cssmin',
-    'concat',
     'ngmin',
     'uglify',
     'copy',
-    'dom_munger:removecss',
-    'dom_munger:addcss',
-    'dom_munger:removescripts',
-    'dom_munger:addscript',
+    'dom_munger:update',
     'htmlmin',
-    'imagemin',
-    'clean:after'
+    'imagemin'
   ]);
 
   grunt.registerTask('test', function(target) {
     if (target === 'watch') {
-      return grunt.task.run(['test', 'watch']);
+      return grunt.task.run([
+        'test',
+        'watch'
+      ]);
     }
-    grunt.task.run(['jshint', 'readdom', 'jasmine']);
+
+    if (target === 'build') {
+      return grunt.task.run([
+        'dom_munger:read',
+        'concat:jasmine',
+        'jasmine:coverage:build'
+      ]);
+    }
+
+    grunt.task.run([
+      'jshint',
+      'dom_munger:read',
+      'concat:jasmine',
+      'jasmine:coverage'
+    ]);
   });
 
   grunt.registerTask('default', ['build']);
@@ -343,7 +416,11 @@ module.exports = function(grunt) {
   grunt.event.on('watch', function(action, filepath) {
     //https://github.com/gruntjs/grunt-contrib-watch/issues/156
 
-    if (filepath.lastIndexOf('.js') !== -1 && filepath.lastIndexOf('.js') === filepath.length - 3) {
+    function endWith(str, find) {
+      return str.slice(-find.length) === find;
+    }
+
+    if (endWith(filepath, '.js')) {
 
       //lint the changed js file
       grunt.config('jshint.main.src', filepath);
@@ -351,8 +428,8 @@ module.exports = function(grunt) {
 
       //find the appropriate unit test for the changed file
       var spec = filepath;
-      if (filepath.lastIndexOf('-spec.js') === -1 || filepath.lastIndexOf('-spec.js') !== filepath.length - 8) {
-        spec = filepath.substring(0, filepath.length - 3) + '-spec.js';
+      if (!endWith(filepath, '-spec.js')) {
+        spec = filepath.slice(0, -3) + '-spec.js';
       }
 
       //if the spec exists then lets run it
@@ -360,14 +437,16 @@ module.exports = function(grunt) {
         grunt.config('jasmine.unit.options.specs', spec);
         grunt.task.run('jasmine:unit');
       }
+
+    } else if (endWith(filepath, '.less')) {
+
+      grunt.task.run('less:dev');
     }
 
     //if index.html changed, we need to reread the <script> tags so our next run of jasmine
     //will have the correct environment
-    if (filepath === 'index.html') {
-      grunt.task.run('readdom');
+    if (filepath === '<%%= yo.main %>') {
+      grunt.task.run('dom_munger:read');
     }
-
   });
-
 };

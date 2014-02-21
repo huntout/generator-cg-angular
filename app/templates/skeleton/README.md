@@ -1,3 +1,3 @@
-#<%= _.slugify(appname) %>
+#<%= appname %>
 
-><%= _.slugify(appname) %> Project
+><%= appname %> Project

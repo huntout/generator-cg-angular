@@ -1,7 +1,7 @@
 {
-  "name": "<%= _.slugify(appname) %>",
+  "name": "<%= appname %>",
   "version": "0.0.0",
-  "description": "<%= _.slugify(appname) %> Project",
+  "description": "<%= appname %> Project",
   "main": "<%= assets %>/index.html",
   "repository": {
     "type": "git"
@@ -25,6 +25,7 @@
     "grunt-dom-munger": "~3.4",
     "grunt-ngmin": "0.0.3",
     "grunt-template-jasmine-istanbul": "~0.3.0",
-    "load-grunt-tasks": "~0.2"
+    "load-grunt-tasks": "~0.2",
+    "underscore": "~1.6.0"
   }
 }
