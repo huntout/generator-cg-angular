@@ -1,16 +1,17 @@
 'use strict';
 
 angular.module('<%= appname %>', [
-  'mgcrea.ngStrap',
-  'ui.utils',
-  'ngRoute',
   'ngAnimate',
+  'ngSanitize',
+  'ngRoute',
   'route-segment',
   'view-segment',
+  'ui.bootstrap',
+  'ui.utils',
   'http-auth-interceptor'
-]);
+])
 
-angular.module('<%= appname %>').config(function($routeSegmentProvider, $routeProvider) {
+.config(function($routeSegmentProvider, $routeProvider) {
 
   $routeSegmentProvider.options.autoLoadTemplates = true;
 
@@ -19,9 +20,9 @@ angular.module('<%= appname %>').config(function($routeSegmentProvider, $routePr
   $routeProvider.otherwise({
     redirectTo: '/'
   });
-});
+})
 
-angular.module('<%= appname %>').run(function($rootScope) {
+.run(function($rootScope) {
 
   $rootScope.safeApply = function(fn) {
     var phase = $rootScope.$$phase;

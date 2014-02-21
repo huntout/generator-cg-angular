@@ -16,7 +16,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     // configurable paths
     yo: (function() {
-      var main = grunt.file.readJSON('bower.json').main || 'index.html';
+      var main = grunt.file.readJSON('package.json').main || 'index.html';
       var assets = path.dirname(main);
       return {
         main: main,
@@ -230,7 +230,8 @@ module.exports = function(grunt) {
         cwd: '<%%= yo.assets %>',
         src: [
           '<%%= dom_munger.data.libjs %>',
-          '<%%= dom_munger.data.catjs %>'
+          '<%%= dom_munger.data.catjs %>',
+          'bower_components/angular-mocks/angular-mocks.js'
         ],
         rename: function(destBase /*, destPath*/ ) {
           return destBase;
