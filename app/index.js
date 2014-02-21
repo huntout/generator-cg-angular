@@ -2,7 +2,11 @@
 
 var util = require('util');
 var path = require('path');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
 var yeoman = require('yeoman-generator');
+var chalk = require('chalk');
+var cgUtils = require('../utils.js');
 
 var CgangularGenerator = module.exports = function CgangularGenerator(args, options /*, config*/ ) {
   yeoman.generators.Base.apply(this, arguments);
@@ -13,6 +17,8 @@ var CgangularGenerator = module.exports = function CgangularGenerator(args, opti
   });
   this.appname = this.appname || path.basename(process.cwd());
   this.appname = this._.camelize(this._.slugify(this._.humanize(this.appname)));
+
+  this.origAssets = path.dirname(cgUtils.pkg().main);
 
   this.on('end', function() {
     this.installDependencies({
@@ -35,7 +41,7 @@ CgangularGenerator.prototype.askFor = function askFor() {
   }, {
     name: 'assets',
     message: 'What would you like the assets folder to be?',
-    default: '.'
+    default: this.origAssets
   }];
 
   this.prompt(prompts, function(props) {
@@ -46,7 +52,28 @@ CgangularGenerator.prototype.askFor = function askFor() {
   }.bind(this));
 };
 
+CgangularGenerator.prototype.moveAssets = function moveAssets() {
+
+  var files, src, dest;
+  if (this.origAssets !== this.assets) {
+    src = path.join(this.destinationRoot(), this.origAssets);
+    dest = path.join(this.destinationRoot(), this.assets);
+    mkdirp.sync(dest);
+    files = fs.readdirSync(path.join(this.sourceRoot(), 'assets/'));
+    this._.each(files, function(n) {
+      try {
+        fs.renameSync(path.join(src, n), path.join(dest, n));
+        this.log.writeln(chalk.green('     move') + ' %s/%s to %s/%s', this.origAssets, n, this.assets, n);
+      } catch (e) {
+
+      }
+    }, this);
+    fs.rmdir(src);
+  }
+};
+
 CgangularGenerator.prototype.app = function app() {
+
   this.directory('skeleton/', '.');
   this.directory('assets/', this.assets);
   if (this.assets !== '.') {

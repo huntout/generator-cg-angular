@@ -3,6 +3,7 @@
 var path = require('path');
 var fs = require('fs');
 var chalk = require('chalk');
+var _ = require('underscore');
 
 exports.updateFile = function(filename, action, generator) {
   try {
@@ -39,6 +40,19 @@ exports.addToString = function(src, lineToAdd, beforeMarker, spacing) {
   }
 
   return src;
+};
+
+exports.pkg = function() {
+  var pkg;
+  try {
+    pkg = require(path.join(process.cwd(), 'package.json'));
+  } catch (e) {
+    pkg = {};
+  }
+  return _.defaults(pkg, {
+    name: 'Cant find name from package.json',
+    main: 'index.html'
+  });
 };
 
 exports.DIRECTIVE_LESS_MARKER = '/* Add Directive LESS Above */';
