@@ -1,9 +1,8 @@
-/*global describe, beforeEach, it*/
 'use strict';
+/*global describe, beforeEach, it*/
 
 var path = require('path');
 var helpers = require('yeoman-generator').test;
-
 
 describe('cg-angular generator', function() {
   beforeEach(function(done) {
