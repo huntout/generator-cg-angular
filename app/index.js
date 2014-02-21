@@ -32,15 +32,24 @@ CgangularGenerator.prototype.askFor = function askFor() {
     name: 'appname',
     message: 'What would you like the angular app/module name to be?',
     default: this.appname
+  }, {
+    name: 'assets',
+    message: 'What would you like the assets folder to be?',
+    default: '.'
   }];
 
   this.prompt(prompts, function(props) {
     this.appname = props.appname;
+    this.assets = props.assets;
 
     cb();
   }.bind(this));
 };
 
 CgangularGenerator.prototype.app = function app() {
-  this.directory('skeleton/', './');
+  this.directory('skeleton/', '.');
+  this.directory('assets/', this.assets);
+  if (this.assets !== '.') {
+    this.write('index.html', this._.template('<script>\nlocation.href = \'<%= assets %>/\';\n</script>\n', this));
+  }
 };
