@@ -438,7 +438,6 @@ module.exports = function(grunt) {
         grunt.config('jasmine.unit.options.specs', spec);
         grunt.task.run('jasmine:unit');
       }
-
     } else if (endWith(filepath, '.less')) {
 
       grunt.task.run('less:dev');
