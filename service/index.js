@@ -12,8 +12,10 @@ var ServiceGenerator = module.exports = function ServiceGenerator( /*args, optio
 util.inherits(ServiceGenerator, SubGenerator);
 
 ServiceGenerator.prototype.files = function files() {
-  this.template('service.js', 'service/' + this.name + '.js');
-  this.template('spec.js', 'service/' + this.name + '-spec.js');
+  var filename = 'service/' + this.name;
 
-  cgUtils.addToFile('index.html', '<script class="app" src="service/' + this.name + '.js"></script>', cgUtils.SERVICE_JS_MARKER, '  ', this);
+  this.template('service.js', filename + '.js');
+  this.template('spec.js', filename + '-spec.js');
+
+  cgUtils.addToFile('index.html', '<script class="app" src="' + filename + '.js"></script>', cgUtils.SERVICE_JS_MARKER, '  ', this);
 };

@@ -1,12 +1,12 @@
 'use strict';
 
-angular.module('<%= appname %>').factory('<%= _.camelize(name) %>', function() {
+angular.module('<%= appname %>').factory('<%= classname %>', function() {
 
-  var <%= _.camelize(name) %> = {
+  var <%= classname %> = {
     doSomething: function() {
       return 'something';
     }
   };
 
-  return <%= _.camelize(name) %>;
+  return <%= classname %>;
 });

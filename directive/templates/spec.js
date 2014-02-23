@@ -1,6 +1,6 @@
 'use strict';
 
-describe('<%= _.camelize(name) %>', function() {
+describe('<%= camelname %>', function() {
 
   beforeEach(module('<%= appname %>'));
 

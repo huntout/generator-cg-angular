@@ -32,7 +32,7 @@ PartialGenerator.prototype.askForRoute = function askForRoute() {
 
   var prompts = [{
     name: 'route',
-    message: 'Enter your route (i.e. /mypartial/:id).  If you don\'t want a route added for you, leave this empty.'
+    message: 'Enter your route (i.e. /foo/:fooId/bar/:barId).  If you don\'t want a route added for you, leave this empty.'
   }];
 
   this.prompt(prompts, function(props) {
@@ -50,7 +50,8 @@ PartialGenerator.prototype.askForRouteMore = function askForRouteMore() {
 
   var prompts = [{
     name: 'routeName',
-    message: 'Enter your route name (i.e. home.mypartial).',
+    message: 'Enter your route name (i.e. foo.bar).',
+    default: this.dotname,
     when: function() {
       return !_.isEmpty(route);
     }
@@ -74,9 +75,9 @@ PartialGenerator.prototype.askForRouteMore = function askForRouteMore() {
 
 PartialGenerator.prototype.files = function files() {
 
-  var filename = 'partial/' + this.name + '/' + this.name;
+  var filename = 'partial/' + this.slugname + '/' + this.slugname;
 
-  this.ctrlname = _.camelize(_.classify(this.name)) + 'Ctrl';
+  this.ctrlname = this.classname + 'Ctrl';
 
   this.template('partial.js', filename + '.js');
   this.template('partial.html', filename + '.html');
@@ -114,7 +115,7 @@ PartialGenerator.prototype.files = function files() {
           return '\'' + n + '\'';
         }).join(', ');
 
-        var a = ['    templateUrl: \'partial/<%= name %>/<%= name %>.html\''];
+        var a = ['    templateUrl: \'partial/<%= slugname %>/<%= slugname %>.html\''];
         if (!_.isEmpty(self.dependencies)) {
           a.push('    dependencies: [<%= dependencies %>]');
         }

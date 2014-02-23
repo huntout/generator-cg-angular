@@ -1,7 +1,7 @@
 'use strict';
 /* globals _ */
 
-describe('setup', function() {
+describe('app setup', function() {
 
   beforeEach(module('<%= appname %>'));
 

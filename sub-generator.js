@@ -9,6 +9,11 @@ var SubGenerator = module.exports = function SubGenerator( /*args, options, conf
 
   yeoman.generators.NamedBase.apply(this, arguments);
 
+  this.classname = this._.chain(this.name).humanize().classify().value();
+  this.slugname = this._.chain(this.name).humanize().slugify().value();
+  this.camelname = this._.chain(this.name).humanize().slugify().camelize().value();
+  this.dotname = this.slugname.replace('-', '.');
+
   var pkg = cgUtils.pkg();
   this.appname = pkg.name;
   this.assets = path.dirname(pkg.main);

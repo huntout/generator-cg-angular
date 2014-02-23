@@ -16,7 +16,7 @@ var CgangularGenerator = module.exports = function CgangularGenerator(args, opti
     required: false
   });
   this.appname = this.appname || path.basename(process.cwd());
-  this.appname = this._.camelize(this._.slugify(this._.humanize(this.appname)));
+  this.appname = this._.chain(this.appname).humanize().slugify().camelize().value();
 
   this.origAssets = path.dirname(cgUtils.pkg().main);
 
@@ -59,7 +59,8 @@ CgangularGenerator.prototype.moveAssets = function moveAssets() {
     src = path.join(this.destinationRoot(), this.origAssets);
     dest = path.join(this.destinationRoot(), this.assets);
     mkdirp.sync(dest);
-    files = fs.readdirSync(path.join(this.sourceRoot(), 'assets/'));
+    files = fs.readdirSync(path.join(this.sourceRoot(), 'assets/'))
+      .concat('bower_components', 'directive', 'files', 'partial', 'service');
     this._.each(files, function(n) {
       try {
         fs.renameSync(path.join(src, n), path.join(dest, n));
@@ -68,7 +69,7 @@ CgangularGenerator.prototype.moveAssets = function moveAssets() {
 
       }
     }, this);
-    fs.rmdir(src);
+    fs.rmdir(src, function() {});
   }
 };
 

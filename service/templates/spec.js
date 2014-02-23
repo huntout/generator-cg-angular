@@ -1,11 +1,11 @@
 'use strict';
 
-describe('<%= _.camelize(name) %>', function() {
+describe('<%= classname %>', function() {
 
   beforeEach(module('<%= appname %>'));
 
-  it('should ...', inject(function(<%= _.camelize(name) %>) {
+  it('should ...', inject(function(<%= classname %>) {
 
-    expect(<%= _.camelize(name) %>.doSomething()).toEqual('something');
+    expect(<%= classname %>.doSomething()).toEqual('something');
   }));
 });

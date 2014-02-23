@@ -12,8 +12,10 @@ var FilterGenerator = module.exports = function FilterGenerator( /*args, options
 util.inherits(FilterGenerator, SubGenerator);
 
 FilterGenerator.prototype.files = function files() {
-  this.template('filter.js', 'filter/' + this.name + '.js');
-  this.template('spec.js', 'filter/' + this.name + '-spec.js');
+  var filename = 'filter/' + this.slugname;
 
-  cgUtils.addToFile('index.html', '<script class="app" src="filter/' + this.name + '.js"></script>', cgUtils.FILTER_JS_MARKER, '  ', this);
+  this.template('filter.js', filename + '.js');
+  this.template('spec.js', filename + '-spec.js');
+
+  cgUtils.addToFile('index.html', '<script class="app" src="' + filename + '.js"></script>', cgUtils.FILTER_JS_MARKER, '  ', this);
 };
