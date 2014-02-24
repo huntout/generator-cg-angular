@@ -70,7 +70,7 @@ module.exports = function(grunt) {
         spawn: false
       },
       main: {
-        files: ['<%%= yo.main %>', '<%%= yo.assets %>/{css,img,mock,<%%= yo.folders.js %>}/**/*'],
+        files: ['<%%= yo.main %>', '<%%= yo.assets %>/{css,img,<%%= yo.folders.js %>}/**/*'],
         tasks: [] //all the tasks are run dynamically during the watch event handler
       }
     },
@@ -80,7 +80,7 @@ module.exports = function(grunt) {
         options: {
           jshintrc: '.jshintrc'
         },
-        src: '<%%= yo.assets %>/{mock,<%%= yo.folders.js %>}/**/*.js'
+        src: '<%%= yo.assets %>/{<%%= yo.folders.js %>}/**/*.js'
       }
     },
 
