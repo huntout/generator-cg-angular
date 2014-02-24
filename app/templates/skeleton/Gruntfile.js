@@ -314,22 +314,19 @@ module.exports = function(grunt) {
     jasmine: {
       options: {
         keepRunner: true,
-        vendor: 'temp/vendor.js'
+        vendor: 'temp/vendor.js',
+        specs: '<%%= yo.assets %>/{<%%= yo.folders.js %>}/**/*-spec.js'
       },
       unit: {
         expand: true,
         cwd: '<%%= yo.assets %>',
-        src: '<%%= dom_munger.data.appjs %>',
-        options: {
-          specs: ''
-        }
+        src: '<%%= dom_munger.data.appjs %>'
       },
       coverage: {
         expand: true,
         cwd: '<%%= yo.assets %>',
         src: '<%%= dom_munger.data.appjs %>',
         options: {
-          specs: '<%%= yo.assets %>/{<%%= yo.folders.js %>}/**/*-spec.js',
           template: require('grunt-template-jasmine-istanbul'),
           templateOptions: {
             coverage: 'temp/coverage/coverage.json',
