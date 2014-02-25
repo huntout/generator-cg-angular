@@ -1,4 +1,5 @@
 'use strict';
+/* globals _ */
 
 angular.module('<%= appname %>', [
   'ngAnimate',
@@ -34,4 +35,8 @@ angular.module('<%= appname %>', [
       this.$apply(fn);
     }
   };
+})
+
+.run(function() {
+  _.mixin(_.str);
 });
