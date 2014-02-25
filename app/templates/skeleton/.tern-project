@@ -1,0 +1,17 @@
+{
+  "libs": [
+    "browser",
+    "jquery",
+    "ecma5",
+    "underscore"
+  ],
+  "plugins": {
+    "angular": "./"
+  },
+  "loadEagerly": [
+    "<%= assets %>/service/*.js"
+  ],
+  "dontLoad": [
+    "<%= assets %>/service/*-spec.js"
+  ]
+}
