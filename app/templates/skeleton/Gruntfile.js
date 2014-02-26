@@ -175,7 +175,7 @@ module.exports = function(grunt) {
             selector: 'body',
             html: [
               '<script src="js/lib.min.js"></script>',
-              '<script src="js/cat.js"></script>',
+              // '<script src="js/cat.js"></script>',
               '<script src="js/app.min.js"></script>'
             ].join('')
           }]
