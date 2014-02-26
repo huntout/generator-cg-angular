@@ -177,7 +177,7 @@ module.exports = function(grunt) {
               '<script src="js/lib.min.js"></script>',
               // '<script src="js/cat.js"></script>',
               '<script src="js/app.min.js"></script>'
-            ].join('')
+            ].join('\n')
           }]
         },
         src: '<%%= yo.main %>',
@@ -271,6 +271,29 @@ module.exports = function(grunt) {
         src: 'dist/<%%= yo.assets %>/js/app.js',
         dest: 'dist/<%%= yo.assets %>/js/app.min.js'
       }
+    },
+
+    filerev: {
+      options: {
+        length: 4
+      },
+      dist: {
+        src: [
+          'dist/<%%= yo.assets %>/**/*.{js,css,gif,jpg,png,eot,svg,ttf,woff,otf}',
+          '!dist/<%%= yo.assets %>/bower_components/font-awesome/fonts/*.*'
+        ]
+      }
+    },
+
+    usemin: {
+      options: {
+        assetsDirs: [
+          'dist/<%%= yo.assets %>',
+          'dist/<%%= yo.assets %>/img'
+        ],
+      },
+      html: ['dist/<%%= yo.main %>'],
+      css: ['dist/<%%= yo.assets %>/css/*.css']
     },
 
     htmlmin: {
@@ -372,6 +395,8 @@ module.exports = function(grunt) {
     'uglify',
     'copy',
     'dom_munger:update',
+    'filerev',
+    'usemin',
     'htmlmin',
     'imagemin'
   ]);
