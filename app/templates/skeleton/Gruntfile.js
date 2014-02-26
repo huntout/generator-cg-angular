@@ -119,16 +119,7 @@ module.exports = function(grunt) {
       main: {
         options: {
           module: '<%= appname %>',
-          htmlmin: {
-            collapseBooleanAttributes: true,
-            collapseWhitespace: true,
-            removeAttributeQuotes: true,
-            removeComments: true,
-            removeEmptyAttributes: true,
-            removeRedundantAttributes: true,
-            removeScriptTypeAttributes: true,
-            removeStyleLinkTypeAttributes: true
-          }
+          htmlmin: '<%= htmlmin.main.options %>'
         },
         cwd: '<%%= yo.assets %>',
         src: '{<%%= yo.folders.html %>}/**/*.html',
