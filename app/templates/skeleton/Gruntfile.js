@@ -7,12 +7,28 @@ var path = require('path');
 
 module.exports = function(grunt) {
 
+  // Show elapsed time after tasks run
+  require('time-grunt')(grunt);
+
   // Load all grunt tasks
   require('load-grunt-tasks')(grunt, {
     pattern: ['grunt-*', '!grunt-template-*']
   });
 
-  // Project configuration
+  function expandFiles(files) {
+    if (files.expand === false) {
+      return files;
+    }
+    return _.extend(files, {
+      expand: true,
+      cwd: files.cwd || '<%%= yo.assets %>',
+      rename: function(destBase) {
+        return destBase;
+      }
+    });
+  }
+
+  // Project configuration.
   grunt.initConfig({
     // configurable paths
     yo: (function() {
@@ -97,8 +113,8 @@ module.exports = function(grunt) {
       dev: {
         options: {
           sourceMap: true,
-          sourceMapFilename: 'temp/<%%= yo.assets %>/css/app.less.css.map',
-          sourceMapURL: 'app.less.css.map',
+          sourceMapFilename: 'temp/<%%= yo.assets %>/css/app.less.map',
+          sourceMapURL: 'app.less.map',
           sourceMapRootpath: '/'
         },
         files: {
@@ -119,7 +135,7 @@ module.exports = function(grunt) {
       main: {
         options: {
           module: '<%= appname %>',
-          htmlmin: '<%= htmlmin.main.options %>'
+          htmlmin: '<%%= htmlmin.main.options %>'
         },
         cwd: '<%%= yo.assets %>',
         src: '{<%%= yo.folders.html %>}/**/*.html',
@@ -128,6 +144,12 @@ module.exports = function(grunt) {
     },
 
     copy: {
+      css: {
+        expand: true,
+        cwd: '<%%= yo.assets %>',
+        src: '<%%= dom_munger.data.css %>',
+        dest: 'temp/'
+      },
       main: {
         expand: true,
         cwd: '<%%= yo.assets %>',
@@ -150,6 +172,10 @@ module.exports = function(grunt) {
             attribute: 'src',
             writeto: 'libjs'
           }, {
+            selector: 'script.ngm',
+            attribute: 'src',
+            writeto: 'ngmjs'
+          }, {
             selector: 'script.cat',
             attribute: 'src',
             writeto: 'catjs'
@@ -160,7 +186,7 @@ module.exports = function(grunt) {
           }, {
             selector: 'link[type="text/css"]',
             attribute: 'href',
-            writeto: 'purecss'
+            writeto: 'css'
           }]
         },
         src: '<%%= yo.main %>'
@@ -186,91 +212,54 @@ module.exports = function(grunt) {
     },
 
     concat: {
-      build: {
-        files: [{
-          src: '<%%= dom_munger.data.purecss %>',
-          dest: 'temp/pure.css'
-        }, {
-          src: '<%%= dom_munger.data.libjs %>',
-          dest: 'dist/<%%= yo.assets %>/js/lib.js'
-        }, {
-          src: '<%%= dom_munger.data.catjs %>',
-          dest: 'dist/<%%= yo.assets %>/js/cat.js'
-        }, {
-          src: '<%%= dom_munger.data.appjs %>',
-          dest: 'temp/app.js'
-        }, {
-          src: ['temp/app.js', '<%%= ngtemplates.main.dest %>'],
-          dest: 'dist/<%%= yo.assets %>/js/app.js',
-          expand: false
-        }].map(function(n) {
-          if (n.expand === false) {
-            return n;
-          }
-          return _.extend(n, {
-            expand: true,
-            cwd: '<%%= yo.assets %>',
-            rename: function(destBase /*, destPath*/ ) {
-              return destBase;
-            }
-          });
-        })
-      },
-      jasmine: {
-        expand: true,
-        cwd: '<%%= yo.assets %>',
+      build: expandFiles({
+        src: '<%%= dom_munger.data.catjs %>',
+        dest: 'dist/<%%= yo.assets %>/js/cat.js'
+      }),
+      jasmine: expandFiles({
         src: [
           '<%%= dom_munger.data.libjs %>',
+          '<%%= dom_munger.data.ngmjs %>',
           '<%%= dom_munger.data.catjs %>',
           'bower_components/angular-mocks/angular-mocks.js'
         ],
-        rename: function(destBase /*, destPath*/ ) {
-          return destBase;
-        },
         dest: 'temp/vendor.js'
-      }
+      })
     },
 
     cssmin: {
-      main: {
-        src: ['temp/app.less.css', 'temp/pure.css'],
+      main: expandFiles({
+        cwd: 'temp',
+        src: ['app.less.css', '<%%= dom_munger.data.css %>'],
         dest: 'dist/<%%= yo.assets %>/css/app.min.css'
-      }
+      })
     },
 
     ngmin: {
-      lib: {
-        src: 'dist/<%%= yo.assets %>/js/lib.js',
-        dest: 'dist/<%%= yo.assets %>/js/lib.js'
-      },
       main: {
-        src: 'dist/<%%= yo.assets %>/js/app.js',
-        dest: 'dist/<%%= yo.assets %>/js/app.js'
+        expand: true,
+        cwd: '<%%= yo.assets %>',
+        src: ['<%%= dom_munger.data.ngmjs %>', '<%%= dom_munger.data.appjs %>'],
+        dest: 'temp/'
       }
     },
 
     uglify: {
       options: {
         report: 'min',
-        sourceMapRoot: '/',
-        sourceMapPrefix: 1
+        sourceMap: true,
+        sourceMapIncludeSources: true,
+        mangle: true
       },
-      lib: {
-        options: {
-          sourceMap: 'dist/<%%= yo.assets %>/js/lib.min.js.map',
-          sourceMappingURL: 'lib.min.js.map'
-        },
-        src: 'dist/<%%= yo.assets %>/js/lib.js',
+      lib: expandFiles({
+        src: '<%%= dom_munger.data.libjs %>',
         dest: 'dist/<%%= yo.assets %>/js/lib.min.js'
-      },
-      main: {
-        options: {
-          sourceMap: 'dist/<%%= yo.assets %>/js/app.min.js.map',
-          sourceMappingURL: 'app.min.js.map'
-        },
-        src: 'dist/<%%= yo.assets %>/js/app.js',
+      }),
+      main: expandFiles({
+        cwd: 'temp',
+        src: ['<%%= dom_munger.data.ngmjs %>', '<%%= dom_munger.data.appjs %>', 'templates.js'],
         dest: 'dist/<%%= yo.assets %>/js/app.min.js'
-      }
+      })
     },
 
     filerev: {
@@ -294,6 +283,15 @@ module.exports = function(grunt) {
       },
       html: ['dist/<%%= yo.main %>'],
       css: ['dist/<%%= yo.assets %>/css/*.css']
+    },
+
+    jssourcemaprev: {
+      options: {
+        moveSrc: true,
+      },
+      files: {
+        src: ['dist/<%%= yo.assets %>/js/*.js'],
+      },
     },
 
     htmlmin: {
@@ -389,14 +387,15 @@ module.exports = function(grunt) {
     'less:dist',
     'dom_munger:read',
     'ngtemplates',
+    'copy',
     'concat:build',
     'cssmin',
     'ngmin',
     'uglify',
-    'copy',
     'dom_munger:update',
     'filerev',
     'usemin',
+    'jssourcemaprev',
     'htmlmin',
     'imagemin'
   ]);
