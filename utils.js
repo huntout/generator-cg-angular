@@ -9,7 +9,7 @@ exports.updateFile = function(filename, action, generator) {
   try {
     var fullPath = path.resolve(filename);
     var relativePath = path.relative(process.cwd(), fullPath);
-    var src = fs.readFileSync(fullPath, 'utf8');
+    var src = fs.readFileSync(fullPath, 'utf8').replace(/\r\n/g, '\n');
     var out = action(src, generator);
 
     if (src === out) {
@@ -35,7 +35,7 @@ exports.addToString = function(src, lineToAdd, beforeMarker, spacing) {
   var allToAdd = lineToAdd + '\n' + spacing;
   var indexOfAdd = src.indexOf(allToAdd);
 
-  if (indexOfAdd + allToAdd.length !== indexOfMarker) {
+  if (indexOfAdd === -1) {
     src = src.slice(0, indexOfMarker) + allToAdd + src.slice(indexOfMarker);
   }
 

@@ -2,23 +2,19 @@
 
 describe('<%= camelname %>', function() {
 
+  var $scope, createElement;
+
   beforeEach(module('<%= appname %>'));
 
-  var $scope, $compile;
-
-  beforeEach(inject(function($rootScope, _$compile_) {
+  beforeEach(inject(function($rootScope, $compile) {
     $scope = $rootScope.$new();
-    $compile = _$compile_;
+    createElement = function() {
+      return $compile('<div <%= camelname %>></div>')($scope);
+    };
   }));
 
-  it('should ...', function() {
-
-    /*
-    To test your directive, you need to create some html that would use your directive,
-    send that through $compile() then compare the results.
-
-    var element = $compile('<div mydirective>hi</div>')($scope);
-    expect(element.text()).toBe('hello, world');
-    */
+  it('should be defined', function() {
+    var element = createElement();
+    expect(element).toBeDefined();
   });
 });

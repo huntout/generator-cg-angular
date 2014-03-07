@@ -2,7 +2,7 @@
 
 angular.module('<%= appname %>').directive('<%= camelname %>', function() {
   return {
-    restrict: 'E',
+    restrict: 'A',
     replace: true,
     scope: {
 

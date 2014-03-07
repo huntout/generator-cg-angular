@@ -2,12 +2,17 @@
 
 describe('<%= camelname %>', function() {
 
+  var $filter, filter;
+
   beforeEach(module('<%= appname %>'));
 
-  it('should ...', inject(function($filter) {
-
-    var filter = $filter('<%= camelname %>');
-
-    expect(filter('input')).toEqual('output');
+  beforeEach(inject(function(_$filter_, <%= camelname %>Filter) {
+    $filter = _$filter_;
+    filter = <%= camelname %>Filter;
   }));
+
+  it('should be defined', function() {
+    expect(filter).toBeDefined();
+    expect(filter).toBe($filter('<%= camelname %>'));
+  });
 });

@@ -2,18 +2,21 @@
 
 describe('<%= ctrlname %>', function() {
 
-  beforeEach(module('<%= appname %>'));
+  var $scope, createCtrl;
 
-  var $scope;
+  beforeEach(module('<%= appname %>'));
 
   beforeEach(inject(function($rootScope, $controller) {
     $scope = $rootScope.$new();
-    $controller('<%= ctrlname %>', {
-      $scope: $scope
-    });
+    createCtrl = function() {
+      return $controller('<%= ctrlname %>', {
+        $scope: $scope
+      });
+    };
   }));
 
-  it('should ...', inject(function() {
-    expect(1).toEqual(1);
-  }));
+  it('should be defined', function() {
+    var ctrl = createCtrl();
+    expect(ctrl).toBeDefined();
+  });
 });

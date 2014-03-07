@@ -2,10 +2,15 @@
 
 describe('<%= classname %>', function() {
 
+  var <%= classname %>;
+
   beforeEach(module('<%= appname %>'));
 
-  it('should ...', inject(function(<%= classname %>) {
-
-    expect(<%= classname %>.doSomething()).toEqual('something');
+  beforeEach(inject(function(_<%= classname %>_) {
+    <%= classname %> = _<%= classname %>_;
   }));
+
+  it('should be defined', function() {
+    expect(<%= classname %>).toBeDefined();
+  });
 });
