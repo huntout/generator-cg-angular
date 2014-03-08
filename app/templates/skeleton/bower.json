@@ -1,7 +1,7 @@
 {
   "name": "<%= appname %>",
   "version": "0.0.0",
-  "main": "<%= assets %>/index.html",
+  "main": "<%= yo.app %>/index.html",
   "dependencies": {
     "bootstrap": "~3.1.1",
     "font-awesome": "~4.0.3",

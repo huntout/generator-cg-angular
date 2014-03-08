@@ -51,7 +51,7 @@ exports.pkg = function() {
   }
   return _.defaults(pkg, {
     name: 'Cant find name from package.json',
-    main: 'index.html'
+    main: 'app/index.html'
   });
 };
 

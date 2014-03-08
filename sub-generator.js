@@ -16,8 +16,9 @@ var SubGenerator = module.exports = function SubGenerator( /*args, options, conf
 
   var pkg = cgUtils.pkg();
   this.appname = pkg.name;
-  this.assets = path.dirname(pkg.main);
-  this.destinationRoot(this.assets);
+  this.yo = {};
+  this.yo.app = path.dirname(pkg.main);
+  this.destinationRoot(this.yo.app);
 };
 
 util.inherits(SubGenerator, yeoman.generators.NamedBase);

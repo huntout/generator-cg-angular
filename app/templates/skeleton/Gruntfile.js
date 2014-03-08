@@ -21,7 +21,7 @@ module.exports = function(grunt) {
     }
     return _.extend(files, {
       expand: true,
-      cwd: files.cwd || '<%%= yo.assets %>',
+      cwd: files.cwd || '<%%= yo.app %>',
       rename: function(destBase) {
         return destBase;
       }
@@ -32,11 +32,13 @@ module.exports = function(grunt) {
   grunt.initConfig({
     // configurable paths
     yo: (function() {
-      var main = grunt.file.readJSON('package.json').main || 'index.html';
+      var main = path.relative('app', grunt.file.readJSON('package.json').main || 'app/index.html');
       var assets = path.dirname(main);
       return {
         main: main,
-        assets: assets,
+        app: path.join('app', assets),
+        dist: path.join('dist', assets),
+        temp: path.join('temp', assets),
         folders: {
           js: 'js,service,filter,directive,partial',
           html: 'directive,partial'
@@ -68,7 +70,7 @@ module.exports = function(grunt) {
       livereload: {
         options: {
           port: 9000,
-          base: ['.', 'temp'],
+          base: ['app', 'temp'],
           open: true
         }
       },
@@ -86,7 +88,7 @@ module.exports = function(grunt) {
         spawn: false
       },
       main: {
-        files: ['<%%= yo.main %>', '<%%= yo.assets %>/{css,img,<%%= yo.folders.js %>}/**/*'],
+        files: ['app/<%%= yo.main %>', '<%%= yo.app %>/{css,img,<%%= yo.folders.js %>}/**/*'],
         tasks: [] //all the tasks are run dynamically during the watch event handler
       }
     },
@@ -96,7 +98,7 @@ module.exports = function(grunt) {
         options: {
           jshintrc: '.jshintrc'
         },
-        src: '<%%= yo.assets %>/{<%%= yo.folders.js %>}/**/*.js'
+        src: '<%%= yo.app %>/{<%%= yo.folders.js %>}/**/*.js'
       }
     },
 
@@ -113,12 +115,12 @@ module.exports = function(grunt) {
       dev: {
         options: {
           sourceMap: true,
-          sourceMapFilename: 'temp/<%%= yo.assets %>/css/app.less.map',
+          sourceMapFilename: '<%%= yo.temp %>/css/app.less.map',
           sourceMapURL: 'app.less.map',
           sourceMapRootpath: '/'
         },
         files: {
-          'temp/<%%= yo.assets %>/css/app.less.css': '<%%= yo.assets %>/css/app.less'
+          '<%%= yo.temp %>/css/app.less.css': '<%%= yo.app %>/css/app.less'
         }
       },
       dist: {
@@ -126,7 +128,7 @@ module.exports = function(grunt) {
           cleancss: true
         },
         files: {
-          'temp/app.less.css': '<%%= yo.assets %>/css/app.less'
+          '<%%= yo.temp %>/app.less.css': '<%%= yo.app %>/css/app.less'
         }
       }
     },
@@ -137,22 +139,22 @@ module.exports = function(grunt) {
           module: '<%= appname %>',
           htmlmin: '<%%= htmlmin.main.options %>'
         },
-        cwd: '<%%= yo.assets %>',
+        cwd: '<%%= yo.app %>',
         src: '{<%%= yo.folders.html %>}/**/*.html',
-        dest: 'temp/templates.js'
+        dest: '<%%= yo.temp %>/templates.js'
       }
     },
 
     copy: {
       css: {
         expand: true,
-        cwd: '<%%= yo.assets %>',
+        cwd: '<%%= yo.app %>',
         src: '<%%= dom_munger.data.css %>',
-        dest: 'temp/'
+        dest: '<%%= yo.temp %>'
       },
       main: {
         expand: true,
-        cwd: '<%%= yo.assets %>',
+        cwd: '<%%= yo.app %>',
         filter: 'isFile',
         src: [
           'img/**',
@@ -160,7 +162,7 @@ module.exports = function(grunt) {
           'bower_components/bootstrap/dist/fonts/**',
           'bower_components/font-awesome/fonts/**'
         ],
-        dest: 'dist/<%%= yo.assets %>'
+        dest: '<%%= yo.dist %>'
       }
     },
 
@@ -189,7 +191,7 @@ module.exports = function(grunt) {
             writeto: 'css'
           }]
         },
-        src: '<%%= yo.main %>'
+        src: 'app/<%%= yo.main %>'
       },
       update: {
         options: {
@@ -206,7 +208,7 @@ module.exports = function(grunt) {
             ].join('\n')
           }]
         },
-        src: '<%%= yo.main %>',
+        src: 'app/<%%= yo.main %>',
         dest: 'dist/<%%= yo.main %>'
       }
     },
@@ -214,7 +216,7 @@ module.exports = function(grunt) {
     concat: {
       build: expandFiles({
         src: '<%%= dom_munger.data.catjs %>',
-        dest: 'dist/<%%= yo.assets %>/js/cat.js'
+        dest: '<%%= yo.dist %>/js/cat.js'
       }),
       jasmine: expandFiles({
         src: [
@@ -223,24 +225,24 @@ module.exports = function(grunt) {
           '<%%= dom_munger.data.catjs %>',
           'bower_components/angular-mocks/angular-mocks.js'
         ],
-        dest: 'temp/vendor.js'
+        dest: '<%%= yo.temp %>/vendor.js'
       })
     },
 
     cssmin: {
       main: expandFiles({
-        cwd: 'temp',
+        cwd: '<%%= yo.temp %>',
         src: ['app.less.css', '<%%= dom_munger.data.css %>'],
-        dest: 'dist/<%%= yo.assets %>/css/app.min.css'
+        dest: '<%%= yo.dist %>/css/app.min.css'
       })
     },
 
     ngmin: {
       main: {
         expand: true,
-        cwd: '<%%= yo.assets %>',
+        cwd: '<%%= yo.app %>',
         src: ['<%%= dom_munger.data.ngmjs %>', '<%%= dom_munger.data.appjs %>'],
-        dest: 'temp/'
+        dest: '<%%= yo.temp %>'
       }
     },
 
@@ -253,12 +255,12 @@ module.exports = function(grunt) {
       },
       lib: expandFiles({
         src: '<%%= dom_munger.data.libjs %>',
-        dest: 'dist/<%%= yo.assets %>/js/lib.min.js'
+        dest: '<%%= yo.dist %>/js/lib.min.js'
       }),
       main: expandFiles({
-        cwd: 'temp',
+        cwd: '<%%= yo.temp %>',
         src: ['<%%= dom_munger.data.ngmjs %>', '<%%= dom_munger.data.appjs %>', 'templates.js'],
-        dest: 'dist/<%%= yo.assets %>/js/app.min.js'
+        dest: '<%%= yo.dist %>/js/app.min.js'
       })
     },
 
@@ -268,8 +270,8 @@ module.exports = function(grunt) {
       },
       dist: {
         src: [
-          'dist/<%%= yo.assets %>/**/*.{js,css,gif,jpg,png,eot,svg,ttf,woff,otf}',
-          '!dist/<%%= yo.assets %>/bower_components/font-awesome/fonts/*.*'
+          '<%%= yo.dist %>/**/*.{js,css,gif,jpg,png,eot,svg,ttf,woff,otf}',
+          '!<%%= yo.dist %>/bower_components/font-awesome/fonts/*.*'
         ]
       }
     },
@@ -277,12 +279,12 @@ module.exports = function(grunt) {
     usemin: {
       options: {
         assetsDirs: [
-          'dist/<%%= yo.assets %>',
-          'dist/<%%= yo.assets %>/img'
+          '<%%= yo.dist %>',
+          '<%%= yo.dist %>/img'
         ],
       },
       html: ['dist/<%%= yo.main %>'],
-      css: ['dist/<%%= yo.assets %>/css/*.css']
+      css: ['<%%= yo.dist %>/css/*.css']
     },
 
     jssourcemaprev: {
@@ -290,7 +292,7 @@ module.exports = function(grunt) {
         moveSrc: true,
       },
       files: {
-        src: ['dist/<%%= yo.assets %>/js/*.js'],
+        src: ['<%%= yo.dist %>/js/*.js'],
       },
     },
 
@@ -316,9 +318,9 @@ module.exports = function(grunt) {
       main: {
         files: [{
           expand: true,
-          cwd: 'dist/',
-          src: ['**/{*.png,*.jpg}'],
-          dest: 'dist/'
+          cwd: '<%%= yo.dist %>',
+          src: ['**/*.{png,jpg}'],
+          dest: '<%%= yo.dist %>'
         }]
       }
     },
@@ -326,17 +328,17 @@ module.exports = function(grunt) {
     jasmine: {
       options: {
         keepRunner: true,
-        vendor: 'temp/vendor.js',
-        specs: '<%%= yo.assets %>/{<%%= yo.folders.js %>}/**/*-spec.js'
+        vendor: '<%%= yo.temp %>/vendor.js',
+        specs: '<%%= yo.app %>/{<%%= yo.folders.js %>}/**/*-spec.js'
       },
       unit: {
         expand: true,
-        cwd: '<%%= yo.assets %>',
+        cwd: '<%%= yo.app %>',
         src: '<%%= dom_munger.data.appjs %>'
       },
       coverage: {
         expand: true,
-        cwd: '<%%= yo.assets %>',
+        cwd: '<%%= yo.app %>',
         src: '<%%= dom_munger.data.appjs %>',
         options: {
           template: require('grunt-template-jasmine-istanbul'),
@@ -457,7 +459,7 @@ module.exports = function(grunt) {
 
     //if index.html changed, we need to reread the <script> tags so our next run of jasmine
     //will have the correct environment
-    if (filepath === '<%%= yo.main %>') {
+    if (filepath === 'app/<%%= yo.main %>') {
       grunt.task.run('dom_munger:read');
     }
   });

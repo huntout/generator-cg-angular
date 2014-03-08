@@ -6,12 +6,12 @@
     "underscore"
   ],
   "plugins": {
-    "angular": "./"
+    "angular": "app/"
   },
   "loadEagerly": [
-    "<%= assets %>/service/*.js"
+    "<%= yo.app %>/service/*.js"
   ],
   "dontLoad": [
-    "<%= assets %>/service/*-spec.js"
+    "<%= yo.app %>/service/*-spec.js"
   ]
 }

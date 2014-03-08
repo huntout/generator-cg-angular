@@ -2,7 +2,7 @@
   "name": "<%= appname %>",
   "version": "0.0.0",
   "description": "<%= appname %> Project",
-  "main": "<%= assets %>/index.html",
+  "main": "<%= yo.app %>/index.html",
   "repository": {
     "type": "git"
   },

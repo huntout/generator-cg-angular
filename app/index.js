@@ -18,7 +18,10 @@ var CgangularGenerator = module.exports = function CgangularGenerator(args, opti
   this.appname = this.appname || path.basename(process.cwd());
   this.appname = this._.chain(this.appname).humanize().slugify().camelize().value();
 
-  this.origAssets = path.dirname(cgUtils.pkg().main);
+  this.yo = {};
+
+  this.yo.origApp = path.dirname(cgUtils.pkg().main);
+  this.origAssets = path.relative('app', this.yo.origApp) || '.';
 
   this.on('end', function() {
     this.installDependencies({
@@ -47,6 +50,7 @@ CgangularGenerator.prototype.askFor = function askFor() {
   this.prompt(prompts, function(props) {
     this.appname = props.appname;
     this.assets = props.assets;
+    this.yo.app = path.join('app', this.assets).replace(/\\/g, '/');
 
     cb();
   }.bind(this));
@@ -55,16 +59,16 @@ CgangularGenerator.prototype.askFor = function askFor() {
 CgangularGenerator.prototype.moveAssets = function moveAssets() {
 
   var files, src, dest;
-  if (this.origAssets !== this.assets) {
-    src = path.join(this.destinationRoot(), this.origAssets);
-    dest = path.join(this.destinationRoot(), this.assets);
+  if (this.yo.origApp !== this.yo.app) {
+    src = path.join(this.destinationRoot(), this.yo.origApp);
+    dest = path.join(this.destinationRoot(), this.yo.app);
     mkdirp.sync(dest);
     files = fs.readdirSync(path.join(this.sourceRoot(), 'assets/'))
-      .concat('bower_components', 'directive', 'files', 'partial', 'service');
+      .concat('bower_components', 'directive', 'filter', 'partial', 'service');
     this._.each(files, function(n) {
       try {
         fs.renameSync(path.join(src, n), path.join(dest, n));
-        this.log.writeln(chalk.green('     move') + ' %s/%s to %s/%s', this.origAssets, n, this.assets, n);
+        this.log.writeln(chalk.green('     move') + ' %s/%s to %s/%s', this.yo.origApp, n, this.yo.app, n);
       } catch (e) {
 
       }
@@ -76,8 +80,8 @@ CgangularGenerator.prototype.moveAssets = function moveAssets() {
 CgangularGenerator.prototype.app = function app() {
 
   this.directory('skeleton/', '.');
-  this.directory('assets/', this.assets);
+  this.directory('assets/', this.yo.app);
   if (this.assets !== '.') {
-    this.write('index.html', this._.template('<script>\nlocation.href = \'<%= assets %>/\';\n</script>\n', this));
+    this.write('app/index.html', this._.template('<script>\nlocation.href = \'<%= assets %>/\';\n</script>\n', this));
   }
 };
