@@ -32,13 +32,18 @@ module.exports = function(grunt) {
   grunt.initConfig({
     // configurable paths
     yo: (function() {
-      var main = path.relative('app', grunt.file.readJSON('package.json').main || 'app/index.html');
+      var pkg = grunt.file.readJSON('package.json');
+      var main = path.relative('app', pkg.main || 'app/index.html');
       var assets = path.dirname(main);
+      var joinAssets = function(folder) {
+        return path.join(folder, assets).replace(/\\/g, '/');
+      }
       return {
+        pkg: pkg,
         main: main,
-        app: path.join('app', assets),
-        dist: path.join('dist', assets),
-        temp: path.join('temp', assets),
+        app: joinAssets('app'),
+        dist: joinAssets('dist'),
+        temp: joinAssets('temp'),
         folders: {
           js: 'js,service,filter,directive,partial',
           html: 'directive,partial'
@@ -136,7 +141,7 @@ module.exports = function(grunt) {
     ngtemplates: {
       main: {
         options: {
-          module: '<%= appname %>',
+          module: '<%%= yo.pkg.name %>',
           htmlmin: '<%%= htmlmin.main.options %>'
         },
         cwd: '<%%= yo.app %>',
@@ -250,8 +255,7 @@ module.exports = function(grunt) {
       options: {
         report: 'min',
         sourceMap: true,
-        sourceMapIncludeSources: true,
-        mangle: true
+        sourceMapIncludeSources: true
       },
       lib: expandFiles({
         src: '<%%= dom_munger.data.libjs %>',

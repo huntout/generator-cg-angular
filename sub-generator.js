@@ -14,10 +14,10 @@ var SubGenerator = module.exports = function SubGenerator( /*args, options, conf
   this.camelname = this._.chain(this.name).humanize().slugify().camelize().value();
   this.dotname = this.slugname.replace('-', '.');
 
-  var pkg = cgUtils.pkg();
-  this.appname = pkg.name;
+  this.pkg = cgUtils.pkg();
+  this.appname = this.pkg.name;
   this.yo = {};
-  this.yo.app = path.dirname(pkg.main);
+  this.yo.app = path.dirname(this.pkg.main);
   this.destinationRoot(this.yo.app);
 };
 

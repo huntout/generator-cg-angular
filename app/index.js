@@ -11,16 +11,18 @@ var cgUtils = require('../utils.js');
 var CgangularGenerator = module.exports = function CgangularGenerator(args, options /*, config*/ ) {
   yeoman.generators.Base.apply(this, arguments);
 
+  this.pkg = cgUtils.pkg();
+
   this.argument('appname', {
     type: String,
     required: false
   });
-  this.appname = this.appname || path.basename(process.cwd());
+  this.appname = this.appname || this.pkg.name || path.basename(process.cwd());
   this.appname = this._.chain(this.appname).humanize().slugify().camelize().value();
 
   this.yo = {};
 
-  this.yo.origApp = path.dirname(cgUtils.pkg().main);
+  this.yo.origApp = path.dirname(this.pkg.main);
   this.origAssets = path.relative('app', this.yo.origApp) || '.';
 
   this.on('end', function() {
@@ -28,8 +30,6 @@ var CgangularGenerator = module.exports = function CgangularGenerator(args, opti
       skipInstall: options['skip-install']
     });
   });
-
-  this.pkg = JSON.parse(this.readFileAsString(path.join(__dirname, '../package.json')));
 };
 
 util.inherits(CgangularGenerator, yeoman.generators.Base);
@@ -68,7 +68,7 @@ CgangularGenerator.prototype.moveAssets = function moveAssets() {
     this._.each(files, function(n) {
       try {
         fs.renameSync(path.join(src, n), path.join(dest, n));
-        this.log.writeln(chalk.green('     move') + ' %s/%s to %s/%s', this.yo.origApp, n, this.yo.app, n);
+        this.log.writeln(chalk.green('     move') + ' %s/%s ' + chalk.green('to') + ' %s/%s', this.yo.origApp, n, this.yo.app, n);
       } catch (e) {
 
       }
