@@ -37,7 +37,7 @@ module.exports = function(grunt) {
       var assets = path.dirname(main);
       var joinAssets = function(folder) {
         return path.join(folder, assets).replace(/\\/g, '/');
-      }
+      };
       return {
         pkg: pkg,
         main: main,
@@ -109,7 +109,7 @@ module.exports = function(grunt) {
 
     clean: {
       all: {
-        src: ['.grunt', 'dist', 'temp']
+        src: ['.grunt', 'dist', 'temp', '_SpecRunner.html']
       }
     },
 
