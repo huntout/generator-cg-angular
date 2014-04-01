@@ -122,7 +122,8 @@ module.exports = function(grunt) {
           sourceMap: true,
           sourceMapFilename: '<%%= yo.temp %>/css/app.less.map',
           sourceMapURL: 'app.less.map',
-          sourceMapRootpath: '/'
+          sourceMapBasepath: '<%%= yo.app %>',
+          sourceMapRootpath: '../'
         },
         files: {
           '<%%= yo.temp %>/css/app.less.css': '<%%= yo.app %>/css/app.less'
