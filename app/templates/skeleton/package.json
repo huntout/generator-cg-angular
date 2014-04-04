@@ -26,6 +26,7 @@
     "grunt-filerev": "~0.2.1",
     "grunt-jssourcemaprev": "~0.1.1",
     "grunt-ngmin": "0.0.3",
+    "grunt-replace": "~0.7.6",
     "grunt-template-jasmine-istanbul": "~0.3.0",
     "grunt-usemin": "~2.0.2",
     "load-grunt-tasks": "~0.2",

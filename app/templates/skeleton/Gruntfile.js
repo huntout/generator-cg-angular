@@ -47,7 +47,8 @@ module.exports = function(grunt) {
         folders: {
           js: 'js,service,filter,directive,partial',
           html: 'directive,partial'
-        }
+        },
+        templates: 'js/templates.js'
       };
     })(),
 
@@ -82,7 +83,8 @@ module.exports = function(grunt) {
       dist: {
         options: {
           port: 9001,
-          base: 'dist'
+          base: 'dist',
+          open: true
         }
       }
     },
@@ -147,7 +149,7 @@ module.exports = function(grunt) {
         },
         cwd: '<%%= yo.app %>',
         src: '{<%%= yo.folders.html %>}/**/*.html',
-        dest: '<%%= yo.temp %>/templates.js'
+        dest: '<%%= yo.temp %>/<%%= yo.templates %>'
       }
     },
 
@@ -264,9 +266,35 @@ module.exports = function(grunt) {
       }),
       main: expandFiles({
         cwd: '<%%= yo.temp %>',
-        src: ['<%%= dom_munger.data.ngmjs %>', '<%%= dom_munger.data.appjs %>', 'templates.js'],
+        src: ['<%%= dom_munger.data.ngmjs %>', '<%%= dom_munger.data.appjs %>', '<%%= yo.templates %>'],
         dest: '<%%= yo.dist %>/js/app.min.js'
       })
+    },
+
+    replace: {
+      options: {
+        patterns: [{
+          match: /("sources":)(\[[^\]]+\])/,
+          replacement: function() {
+            var m1 = RegExp.$1;
+            var m2 = RegExp.$2;
+            var base = grunt.template.process('<%%= uglify.' + grunt.task.current.target + '.cwd %>');
+            var a = JSON.parse(m2).map(function(n) {
+              var file = path.join(base, 'js', n);
+              return path.relative(base, file).replace(/\\/g, '/');
+            });
+            return m1 + JSON.stringify(a);
+          }
+        }]
+      },
+      lib: {
+        src: '<%%= yo.dist %>/js/lib.min.map',
+        dest: '<%%= yo.dist %>/js/lib.min.map'
+      },
+      main: {
+        src: '<%%= yo.dist %>/js/app.min.map',
+        dest: '<%%= yo.dist %>/js/app.min.map'
+      }
     },
 
     filerev: {
@@ -399,6 +427,7 @@ module.exports = function(grunt) {
     'cssmin',
     'ngmin',
     'uglify',
+    'replace',
     'dom_munger:update',
     'filerev',
     'usemin',
